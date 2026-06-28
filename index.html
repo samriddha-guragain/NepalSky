@@ -486,10 +486,7 @@ async function fetchFlights(){
   const base = https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax};
 const url = https://corsproxy.io/? + encodeURIComponent(base);
 const res = await fetch(url);
-  const hdrs={};
-  if(OPENSKY_PASS!=='YOUR_PASSWORD_HERE') hdrs['Authorization']='Basic '+btoa(OPENSKY_USER+':'+OPENSKY_PASS);
   try{
-    const res=await fetch(url,{headers:hdrs});
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
     flights=(data.states||[]).map(parseState).filter(f=>f.lat&&f.lon);
