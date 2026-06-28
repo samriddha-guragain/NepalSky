@@ -331,9 +331,9 @@ body{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ── CONFIG — fill OPENSKY_PASS locally, never push to GitHub ── */
-const OPENSKY_USER = '';
-const OPENSKY_PASS = '';
-const REFRESH_SEC  = 60;
+const OPENSKY_USER = 'guragainsamriddha';
+const OPENSKY_PASS = 'JLG1z8N7QJLc0BmD0PNEo52HNjPwv8Tx';
+const REFRESH_SEC  = 300;
 const BOUNDS = { lamin:26.3, lamax:30.5, lomin:80.0, lomax:88.2 };
 
 /* ── Map ── */
@@ -483,17 +483,28 @@ async function fetchFlights(){
   setStatus('loading','Fetching…');
   hideError();
   const {lamin,lamax,lomin,lomax}=BOUNDS;
-  const url = https://api.allorigins.win/raw?url=`+encodeURIComponent(https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`);
-const res = await fetch(url);
-  try{
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
+  const direct=`https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
+  const proxies=[
+    `https://corsproxy.io/?`+encodeURIComponent(direct),
+    `https://api.allorigins.win/raw?url=`+encodeURIComponent(direct),
+    `https://cors-anywhere.herokuapp.com/`+direct
+  ];
+  let data=null;
+  for(const url of proxies){
+    try{
+      const res=await fetch(url);
+      if(!res.ok) continue;
+      data=await res.json();
+      if(data&&data.states!==undefined) break;
+    } catch(e){ continue; }
+  }
+  if(data&&data.states){
     flights=(data.states||[]).map(parseState).filter(f=>f.lat&&f.lon);
     setStatus('live','Live');
     hideError();
-  } catch(e){
+  } else {
     setStatus('error','Error — demo data');
-    showError('OpenSky unreachable ('+e.message+'). Showing demo aircraft.');
+    showError('OpenSky unreachable. Showing demo aircraft.');
     flights=demoStates().map(parseState).filter(f=>f.lat&&f.lon);
   }
   document.getElementById('planeCount').textContent=flights.length;
