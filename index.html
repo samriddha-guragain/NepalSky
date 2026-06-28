@@ -483,8 +483,7 @@ async function fetchFlights(){
   setStatus('loading','Fetching…');
   hideError();
   const {lamin,lamax,lomin,lomax}=BOUNDS;
-  const base = https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax};
-const url = https://corsproxy.io/? + encodeURIComponent(base);
+  const url = https://api.allorigins.win/raw?url=`+encodeURIComponent(https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`);
 const res = await fetch(url);
   try{
     if(!res.ok) throw new Error('HTTP '+res.status);
